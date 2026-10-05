@@ -1,0 +1,10 @@
+[
+  { "id": "primordial", "label": "Primordial" },
+  { "id": "patriarchs", "label": "Patriarchs" },
+  { "id": "exodus_wilderness", "label": "Exodus / Law / Wilderness" },
+  { "id": "pre_kings", "label": "Pre-Kings" },
+  { "id": "kings", "label": "Kings" },
+  { "id": "exile_return", "label": "Exile and Return" },
+  { "id": "jesus", "label": "Jesus" },
+  { "id": "church", "label": "Church" }
+]

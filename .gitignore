@@ -1,0 +1,13 @@
+# deps
+node_modules/
+
+# build
+dist/
+
+# trailstep runtime (keep inputs + config, drop run histories)
+.trailstep/runs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
