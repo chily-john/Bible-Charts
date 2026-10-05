@@ -12,9 +12,9 @@ const nodes: readonly NodeDraft[] = data.nodes;
 const edges: readonly EdgeDraft[] = data.edges;
 
 describe("computeSideCharacterIds", () => {
-  it("flags off-lineage floaters (Lot) and nobody else", () => {
+  it("flags off-lineage floaters (Lot, Jethro, Pharaoh) and nobody else", () => {
     const side = computeSideCharacterIds(nodes, edges);
-    expect([...side]).toEqual(["lot"]);
+    expect([...side]).toEqual(["lot", "jethro", "pharaoh_exodus"]);
   });
 });
 

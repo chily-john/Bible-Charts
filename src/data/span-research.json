@@ -1,0 +1,182 @@
+{
+  "adam": {
+    "span": { "start": "Gen 2:7", "end": "Gen 5:5" },
+    "refs": ["Gen 2:7", "Gen 3:20", "Gen 5:3"],
+    "confidence": "low",
+    "note": "Death not recorded in Scripture; end = last genealogical mention (Gen 5:5, age 930). Adam also named in 1Chr 1:1, Lk 3:38, Rom 5:12 (all outside Genesis span)."
+  },
+  "eve": {
+    "span": { "start": "Gen 2:22", "end": "Gen 4:1" },
+    "refs": ["Gen 2:22", "Gen 3:1", "Gen 4:1"],
+    "confidence": "low",
+    "note": "Creation-from-rib at Gen 2:22; last narrative mention as named person ~Gen 4:1 (birth of Cain). Death not recorded; later NT mentions (2Cor 11:3) outside Genesis."
+  },
+  "cain": {
+    "span": { "start": "Gen 4:1", "end": "Gen 4:25" },
+    "refs": ["Gen 4:1", "Gen 4:3", "Gen 4:25"],
+    "confidence": "medium",
+    "note": "First-born Gen 4:1; the Cain line (Enoch/Methushael/Irad/Mehujael) runs Gen 4:17-18. Death not recorded; end = last Genesis genealogy mention Gen 4:25."
+  },
+  "abel": {
+    "span": { "start": "Gen 4:2", "end": "Gen 4:8" },
+    "refs": ["Gen 4:2", "Gen 4:4", "Gen 4:8"],
+    "confidence": "high",
+    "note": "Appears only in Gen 4; death by Cain recorded at Gen 4:8. Also cited in Mt 10:17, Heb 11:4 (outside Genesis span)."
+  },
+  "seth": {
+    "span": { "start": "Gen 4:25", "end": "Gen 5:8" },
+    "refs": ["Gen 4:25", "Gen 5:3", "Gen 5:8"],
+    "confidence": "medium",
+    "note": "Born Gen 4:25; lifespan (912 yrs, death) recorded genealogically at Gen 5:8. Also in 1Chr 1:1, Lk 3:38."
+  },
+  "enoch_cain": {
+    "span": { "start": "Gen 4:17", "end": "Gen 4:18" },
+    "refs": ["Gen 4:17", "Gen 4:18"],
+    "confidence": "low",
+    "note": "Cain's son, named only in the Cain genealogy Gen 4:17-18; no narrative, no recorded death. Distinct from Seth-line Enoch (Gen 5:18)."
+  },
+  "lamech_cain": {
+    "span": { "start": "Gen 4:19", "end": "Gen 4:24" },
+    "refs": ["Gen 4:19", "Gen 4:23", "Gen 4:24"],
+    "confidence": "low",
+    "note": "Cain-line Lamech; has a short taunt speech Gen 4:23-24. Death not recorded. Distinct from Noah's father Lamech (Gen 5:25-31)."
+  },
+  "jabal": {
+    "span": { "start": "Gen 4:20", "end": "Gen 4:22" },
+    "refs": ["Gen 4:20", "Gen 4:22"],
+    "confidence": "low",
+    "note": "Named only in the Cain-line genealogy Gen 4:20-22 (ancestor of shepherds/tent-dwellers). No narrative, no recorded death."
+  },
+  "jubal": {
+    "span": { "start": "Gen 4:21", "end": "Gen 4:22" },
+    "refs": ["Gen 4:21", "Gen 4:22"],
+    "confidence": "low",
+    "note": "Named only in the Cain-line genealogy Gen 4:20-22 (ancestor of harp/flute players). No narrative, no recorded death."
+  },
+  "tubal_cain": {
+    "span": { "start": "Gen 4:22", "end": "Gen 4:22" },
+    "refs": ["Gen 4:22"],
+    "confidence": "low",
+    "note": "Named only once at Gen 4:22 (forger of bronze/iron tools). Single mention only, single verse span."
+  },
+  "enoch_seth": {
+    "span": { "start": "Gen 5:18", "end": "Gen 5:24" },
+    "refs": ["Gen 5:18", "Gen 5:23", "Gen 5:24"],
+    "confidence": "medium",
+    "note": "Seth-line Enoch; genealogy Gen 5:18, lifespan Gen 5:23, 'walked with God' Gen 5:24 (source of tradition). Death not narrated. Also Lk 3:37, Heb 11:5."
+  },
+  "methuselah": {
+    "span": { "start": "Gen 5:21", "end": "Gen 5:27" },
+    "refs": ["Gen 5:21", "Gen 5:25", "Gen 5:27"],
+    "confidence": "high",
+    "note": "Genealogy Gen 5:21; oldest recorded lifespan (969 yrs) with death at Gen 5:27. Also 1Chr 1:3, Lk 3:37."
+  },
+  "lamech_seth": {
+    "span": { "start": "Gen 5:25", "end": "Gen 5:31" },
+    "refs": ["Gen 5:25", "Gen 5:28", "Gen 5:31"],
+    "confidence": "medium",
+    "note": "Noah's father; genealogy Gen 5:25, sons named Gen 5:28-29, death (777 yrs) at Gen 5:31 (genealogical). Distinct from Cain-line Lamech."
+  },
+  "noah": {
+    "span": { "start": "Gen 5:29", "end": "Gen 9:29" },
+    "refs": ["Gen 5:29", "Gen 6:9", "Gen 9:29"],
+    "confidence": "high",
+    "note": "Birth Gen 5:29; flood narrative Gen 6-9; death (950 yrs) at Gen 9:29. Also 1Chr 1:4, Lk 3:36, 2Pet 2:5."
+  },
+  "shem": {
+    "span": { "start": "Gen 5:32", "end": "Gen 11:11" },
+    "refs": ["Gen 5:32", "Gen 10:21", "Gen 11:10"],
+    "confidence": "medium",
+    "note": "Born Gen 5:32; sons genealogies Gen 10:21-31; shown age 100 two years after the flood Gen 11:10-11. Death not recorded."
+  },
+  "ham": {
+    "span": { "start": "Gen 5:32", "end": "Gen 10:20" },
+    "refs": ["Gen 5:32", "Gen 9:18", "Gen 10:20"],
+    "confidence": "low",
+    "note": "Born Gen 5:32; curse narrative Gen 9:18-27; sons genealogies Gen 10:6-20. Death not recorded."
+  },
+  "japheth": {
+    "span": { "start": "Gen 5:32", "end": "Gen 10:5" },
+    "refs": ["Gen 5:32", "Gen 10:2", "Gen 10:3"],
+    "confidence": "low",
+    "note": "Born Gen 5:32; sons genealogies Gen 10:2-5 only. No narrative, no recorded death."
+  },
+  "canaan": {
+    "span": { "start": "Gen 9:18", "end": "Gen 10:15" },
+    "refs": ["Gen 9:18", "Gen 9:22", "Gen 10:15"],
+    "confidence": "low",
+    "note": "Ham's son, cursed by Noah Gen 9:25-27; descendants (Sidon, Heth, etc.) Gen 10:15-19. Death not recorded."
+  },
+  "nimrod": {
+    "span": { "start": "Gen 10:8", "end": "Gen 10:12" },
+    "refs": ["Gen 10:8", "Gen 10:10", "Gen 10:11"],
+    "confidence": "medium",
+    "note": "First mighty hunter, kingdom 'began at Babel' Gen 10:8-12. Death not recorded; the project graph's Canaan→Nimrod edge is a ~gap (Genesis places Nimrod as Cush's son, Gen 10:8). Human spot-check recommended."
+  },
+  "eber": {
+    "span": { "start": "Gen 10:24", "end": "Gen 11:16" },
+    "refs": ["Gen 10:24", "Gen 11:14", "Gen 11:16"],
+    "confidence": "medium",
+    "note": "Father of Peleg and Joktan Gen 10:25; lifespan and descendants in the post-diluvian genealogy Gen 11:14-16. NOTE: project graph links Shem→Eber with ~gap; Scripture places Shelah and Arphaxad between (Shem→Arphaxad→Shelah→Eber)."
+  },
+  "peleg": {
+    "span": { "start": "Gen 10:25", "end": "Gen 11:19" },
+    "refs": ["Gen 10:25", "Gen 11:18", "Gen 11:19"],
+    "confidence": "medium",
+    "note": "Born when Eber was 34; 'in his day the earth was divided' (Babel-era tradition) Gen 10:25; death (239 yrs) genealogically Gen 11:18-19. Project graph Eber→Peleg matches Scripture."
+  },
+  "terah": {
+    "span": { "start": "Gen 11:26", "end": "Gen 11:32" },
+    "refs": ["Gen 11:26", "Gen 11:31", "Gen 11:32"],
+    "confidence": "high",
+    "note": "Father of Abram/Nahor/Haran Gen 11:26; travels to Haran Gen 11:31; dies there aged 205 Gen 11:32."
+  },
+  "abraham": {
+    "span": { "start": "Gen 11:26", "end": "Gen 25:8" },
+    "refs": ["Gen 11:26", "Gen 12:1", "Gen 25:8"],
+    "confidence": "high",
+    "note": "Born (Abram) Gen 11:26; covenant Gen 15/17; death at 175 recorded Gen 25:8. Also 1Chr 1:27, Mt 1:2, Lk 3:34."
+  },
+  "sarah": {
+    "span": { "start": "Gen 11:29", "end": "Gen 23:2" },
+    "refs": ["Gen 11:29", "Gen 12:12", "Gen 23:1"],
+    "confidence": "high",
+    "note": "Named as Abram's wife Gen 11:29; barrenness Gen 11:30; death in Hebron aged 127 recorded Gen 23:1-2."
+  },
+  "hagar": {
+    "span": { "start": "Gen 16:1", "end": "Gen 21:17" },
+    "refs": ["Gen 16:1", "Gen 16:3", "Gen 21:14"],
+    "confidence": "medium",
+    "note": "Sarai's Egyptian maidservant Gen 16:1; wilderness flight and the well encounter Gen 21:14-21. Death not recorded; hostility order revisited Gen 25:12."
+  },
+  "ishmael": {
+    "span": { "start": "Gen 16:15", "end": "Gen 25:17" },
+    "refs": ["Gen 16:15", "Gen 25:12", "Gen 25:17"],
+    "confidence": "high",
+    "note": "Birth when Abraham was 86 Gen 16:15-16; descendants Gen 25:12-15; death at 137 recorded Gen 25:17. Also Gen 17:25, Gen 21:20."
+  },
+  "lot": {
+    "span": { "start": "Gen 11:31", "end": "Gen 19:38" },
+    "refs": ["Gen 11:31", "Gen 19:29", "Gen 19:38"],
+    "confidence": "medium",
+    "note": "Leaves Ur with Terah/Abram Gen 11:31; Sodom rescue Gen 19:1-29; last named as ancestor of Moab/Ammon Gen 19:37-38. Death not recorded."
+  },
+  "the_fall": {
+    "span": { "start": "Gen 3:1", "end": "Gen 3:24" },
+    "refs": ["Gen 3:1", "Gen 3:6", "Gen 3:24"],
+    "confidence": "medium",
+    "note": "Spans the Genesis Fall narrative (Serpent→temptation→expulsion). Heavenly (Lucifer) fall is NOT narrated in Genesis — only alluded to (Isa 14:12, Ezk 28:12-16, Lk 10:18); union of both under one span is thematic, not textual. Human spot-check recommended."
+  },
+  "the_flood": {
+    "span": { "start": "Gen 6:13", "end": "Gen 9:17" },
+    "refs": ["Gen 6:13", "Gen 7:10", "Gen 8:4"],
+    "confidence": "medium",
+    "note": "Covers the Flood narrative: ark instructions Gen 6:13-22, deluge Gen 7:10-8:3, recession Gen 8:4-14, Noahic/rainbow covenant Gen 9:9-17. Human spot-check recommended on exact narrative bounds."
+  },
+  "babel": {
+    "span": { "start": "Gen 11:1", "end": "Gen 11:9" },
+    "refs": ["Gen 11:1", "Gen 11:4", "Gen 11:9"],
+    "confidence": "high",
+    "note": "Tower of Babel narrative Gen 11:1-9: single-language world, city/tower build, divine dispersion, language confusion."
+  }
+}

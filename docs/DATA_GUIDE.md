@@ -47,6 +47,14 @@ How to edit the graph data (`src/data/*.json`) and content (`src/content/**/*.md
   parent edge (e.g. `canaan → nimrod`, `shem → eber`).
 - **Era field**: every node carries an era. Primordial covers up to Babel;
   patriarchs starts at Eber. Era order in `eras.json` drives layout.
+- **`exodus_wilderness` roots (Wave B)**: the Moses-era chain (Amram/Jochebed →
+  Miriam, Aaron, Moses) starts at new founder roots — no incoming parent edge —
+  because Joseph is not yet in the graph. Era bands keep the story clear even
+  though these roots share rank 0 with Adam/Eve. Zipporah is a spouse
+  (`moses → zipporah`); Jethro and Pharaoh of the Exodus are `lineage: false`
+  side characters reached only by encounter edges from Moses. Events
+  (`burning_bush`, `exodus`, `sinai`) float per R4: `burning_bush`/`exodus`
+  anchor Moses, `sinai` anchors Moses + Aaron.
 - **Lineage flag**: `lineage: false` marks offshoots (Cain line, Canaan/Nimrod,
   Lot). They keep real parent edges; the main line is the lineage chain.
 - **Span convention**: refs/spans use `Gen 12:1` or chapter-only `Gen 12` forms.

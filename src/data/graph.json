@@ -27,9 +27,20 @@
     { "id": "hagar", "kind": "person", "label": "Hagar", "lineage": true, "tags": [], "span": null, "refs": [], "era": "patriarchs" },
     { "id": "ishmael", "kind": "person", "label": "Ishmael", "lineage": true, "tags": [], "span": null, "refs": [], "era": "patriarchs" },
     { "id": "lot", "kind": "person", "label": "Lot", "lineage": false, "tags": [], "span": null, "refs": [], "era": "patriarchs" },
+    { "id": "amram", "kind": "person", "label": "Amram", "lineage": true, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "jochebed", "kind": "person", "label": "Jochebed", "lineage": true, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "moses", "kind": "person", "label": "Moses", "subtitle": "Levite line", "lineage": true, "tags": ["exodus_way"], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "aaron", "kind": "person", "label": "Aaron", "lineage": true, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "miriam", "kind": "person", "label": "Miriam", "lineage": true, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "zipporah", "kind": "person", "label": "Zipporah", "subtitle": "daughter of Jethro", "lineage": true, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "jethro", "kind": "person", "label": "Jethro", "subtitle": "priest of Midian", "lineage": false, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "pharaoh_exodus", "kind": "person", "label": "Pharaoh of the Exodus", "lineage": false, "tags": [], "span": null, "refs": [], "era": "exodus_wilderness" },
     { "id": "the_fall", "kind": "event", "label": "The Fall", "lineage": true, "tags": ["tree_of_life"], "span": null, "refs": [], "era": "primordial" },
     { "id": "the_flood", "kind": "event", "label": "The Flood", "lineage": true, "tags": ["covenants"], "span": null, "refs": [], "era": "primordial" },
-    { "id": "babel", "kind": "event", "label": "Babel", "lineage": true, "tags": ["cities"], "span": null, "refs": [], "era": "primordial" }
+    { "id": "babel", "kind": "event", "label": "Babel", "lineage": true, "tags": ["cities"], "span": null, "refs": [], "era": "primordial" },
+    { "id": "burning_bush", "kind": "event", "label": "Burning Bush", "lineage": true, "tags": ["mountain"], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "exodus", "kind": "event", "label": "The Exodus", "lineage": true, "tags": ["exodus_way"], "span": null, "refs": [], "era": "exodus_wilderness" },
+    { "id": "sinai", "kind": "event", "label": "Sinai", "lineage": true, "tags": ["covenants"], "span": null, "refs": [], "era": "exodus_wilderness" }
   ],
   "edges": [
     { "from": "adam", "to": "eve", "type": "spouse" },
@@ -61,6 +72,17 @@
     { "from": "adam", "to": "the_fall", "type": "event" },
     { "from": "eve", "to": "the_fall", "type": "event" },
     { "from": "noah", "to": "the_flood", "type": "event" },
-    { "from": "nimrod", "to": "babel", "type": "event" }
+    { "from": "nimrod", "to": "babel", "type": "event" },
+    { "from": "amram", "to": "jochebed", "type": "spouse" },
+    { "from": "moses", "to": "zipporah", "type": "spouse" },
+    { "from": "jochebed", "to": "miriam", "type": "parent" },
+    { "from": "jochebed", "to": "aaron", "type": "parent" },
+    { "from": "jochebed", "to": "moses", "type": "parent" },
+    { "from": "moses", "to": "jethro", "type": "encounter" },
+    { "from": "moses", "to": "pharaoh_exodus", "type": "encounter" },
+    { "from": "moses", "to": "burning_bush", "type": "event" },
+    { "from": "moses", "to": "exodus", "type": "event" },
+    { "from": "moses", "to": "sinai", "type": "event" },
+    { "from": "aaron", "to": "sinai", "type": "event" }
   ]
 }
