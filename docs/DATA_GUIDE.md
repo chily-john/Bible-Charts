@@ -49,8 +49,9 @@ How to edit the graph data (`src/data/*.json`) and content (`src/content/**/*.md
   patriarchs starts at Eber. Era order in `eras.json` drives layout.
 - **`exodus_wilderness` roots (Wave B)**: the Moses-era chain (Amram/Jochebed →
   Miriam, Aaron, Moses) starts at new founder roots — no incoming parent edge —
-  because Joseph is not yet in the graph. Era bands keep the story clear even
-  though these roots share rank 0 with Adam/Eve. Zipporah is a spouse
+  because Joseph is not yet in the graph. Per the R7 era-floor rule these roots
+  stack BELOW the patriarchs floor (they no longer share rank 0 with Adam/Eve).
+  Zipporah is a spouse
   (`moses → zipporah`); Jethro and Pharaoh of the Exodus are `lineage: false`
   side characters reached only by encounter edges from Moses. Events
   (`burning_bush`, `exodus`, `sinai`) float per R4: `burning_bush`/`exodus`
@@ -86,7 +87,7 @@ npm run validate
   (Cut deliberately: no serpent/serpent-edge exists in `graph.json`; the Fall
   is carried by the floating `the_fall` era-marker event + Adam/Eve markdown.)
 
-## Layout rules R1–R6 (LOCKED — precise arrangement beats compactness)
+## Layout rules R1–R7 (LOCKED — precise arrangement beats compactness)
 
 - **R1 RANK=GENERATION**: `rank(node)` = longest parent-edge chain from
   founders (`rank 0` = Adam/Eve; founders = no incoming parent edge).
@@ -110,13 +111,32 @@ npm run validate
   between/below the pair (its markdown covers the heavenly + human falls).
   `the_flood` → Noah, `babel` → Nimrod. The `cain_abel` event node was
   DELETED (that story lives in Cain/Abel markdown + `Gen 4` refs).
-- **R5 OFF-LINEAGE GOES RIGHT, SAME RANK**: within-rank x-order key =
-  `(rank, lineage true-first, edge-order index in graph.json, id)`. The Cain
-  line shares ranks with the Seth line but sits right; Lot sits in Abraham's
-  rank off to the side. No left-right mode, no special casing.
+- **R5 CENTERED DESCENT; OFFSHOOTS PEEL RIGHT (amended)**: within-rank x is
+  anchored to the family column, not left-packed. Each family unit's children
+  are centered under the unit's x (unit x = mean of member positions), so a
+  single main child sits exactly under its parent unit and the main bloodline
+  (Adam-Seth-Noah-Shem-Abraham-Isaac-Jacob-Judah) reads as near-vertical
+  columns. Offshoot subtrees — roots marked `lineage: false` (Cain line,
+  Canaan/Nimrod, Ishmael/Esau) — peel RIGHT of the main column at the same
+  rank and their descendants stay with them. The within-rank order key is
+  still `(rank, lineage true-first, edge-order index in graph.json, id)`;
+  Lot sits right of everything in Abraham's rank. Two passes: pass 1 seeds
+  from the existing ELK/R5 order, pass 2 centers top-down from founders with
+  a per-rank overlap sweep (subtrees shift right, never across ranks). No
+  left-right mode, no special casing.
 - **R6 EDGE ORDER IS LAW**: spouse-edge order in `graph.json` = wife
   left-to-right; parent edges grouped by mother then birth order = sibling
   order. Layout derives order ONLY from these (plus the R5 key).
+- **R7 ERA STACKING (rank is era-aware)**: founder nodes (no incoming parent
+  edge) get `baseRank = 1 + max rank of all nodes in strictly earlier eras`
+  (era order from `eras.json`; the earliest era present keeps base 0 so
+  Adam/Eve stay rank 0). Generation rank then accumulates `+1` per parent step
+  within the component, so each era's roots stack below the previous era's
+  floor (exodus roots sit under the patriarchs floor; future eras stack
+  likewise). Multi-era components keep their computed rank (parent chain
+  beats era), and EraBand boxes are pure bounding boxes of member ranks —
+  they stretch to contain, and no node is ever shifted to fit a band.
+  `y = rank * (cardH + rankGap)` is unchanged.
 - **Fall kept as floating era-marker**: `the_fall` is intentionally NOT a
   ranked node — it floats near the Adam/Eve pair as the primordial era's
   marker event. Do not give it parent/spouse edges or expect it in a rank.

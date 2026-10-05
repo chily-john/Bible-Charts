@@ -381,10 +381,41 @@ export function computeHiddenIds(
 }
 
 /**
+ * R7 ERA STACKING helper (owned by the layout-rules task).
+ *
+ * baseRank for founder nodes (no incoming parent edge) = 1 + max rank of all
+ * nodes in STRICTLY EARLIER eras, where "earlier" follows the era order from
+ * src/data/eras.json and `rankOf` yields a node's FINAL rank (the layout's
+ * spouse-component-lifted rank). The earliest era present keeps base 0, so R1
+ * (rank 0 = Adam/Eve) is preserved; generation rank then accumulates +1 per
+ * parent step within the component from that base. Returns 0 for the earliest
+ * era present or an era with no visible earlier-era nodes.
+ */
+export function eraBaseRank(
+  era: string,
+  eraOrder: readonly string[],
+  nodes: readonly { id: string; era?: string }[],
+  rankOf: (id: string) => number
+): number {
+  const idx = eraOrder.indexOf(era);
+  if (idx <= 0) return 0; // earliest era present: founders stay at rank 0
+  let best = -1;
+  for (const n of nodes) {
+    const ni = eraOrder.indexOf(n.era ?? "");
+    if (ni < 0 || ni >= idx) continue; // strictly earlier eras only
+    best = Math.max(best, rankOf(n.id));
+  }
+  return best + 1;
+}
+
+/**
  * R1 RANK=GENERATION helper (owned by the layout-rules task).
  *
  * rank(node) = longest parent-edge chain from founders. Founders (no incoming
- * parent edge) are rank 0; every other node is 1 + max(rank of its parents).
+ * parent edge) are rank 0 here — this is the RAW pass; R7 era floors (founder
+ * baseRank = 1 + max rank of strictly earlier eras, see eraBaseRank) and
+ * spouse-component lifting are applied by the layout's component pass.
+ * Every other node is 1 + max(rank of its parents).
  * Siblings share parents, so they share a rank by construction. Spouse-only
  * persons (no parent edges at all, e.g. Sarah/Hagar) score 0 here — the
  * layout pass lifts each spouse component to its max member rank, so wives

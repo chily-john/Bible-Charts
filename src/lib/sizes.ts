@@ -11,6 +11,8 @@ export const EVENT_GAP = 56;
 /** Horizontal step between multiple events floating off the same anchor (R4). */
 export const EVENT_SLOT_DX = 190;
 export const SPOUSE_GAP = 24;
+/** Horizontal gap between adjacent family units on the same rank (R5). */
+export const UNIT_GAP = SPOUSE_GAP * 2;
 /** Gap between a node and side-placed (non-layered) neighbours, e.g. Lot. */
 export const FREE_NODE_GAP = 96;
 /** Inner padding between era content and its band border. */

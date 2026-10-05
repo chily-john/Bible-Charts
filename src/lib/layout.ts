@@ -1,5 +1,6 @@
 import ELK, { type ElkNode } from "elkjs/lib/elk.bundled.js";
-import { computeGenerationRank } from "./graph";
+import eraDefs from "../data/eras.json";
+import { eraBaseRank } from "./graph";
 import {
   ERA_BAND_HEADER,
   ERA_BAND_PADDING,
@@ -10,6 +11,7 @@ import {
   PERSON_SIZE,
   RANK_GAP,
   SPOUSE_GAP,
+  UNIT_GAP,
 } from "./sizes";
 
 /*
@@ -71,15 +73,37 @@ import {
  *     babel → Nimrod. (cain_abel was DELETED — that story lives in Cain/Abel
  *     markdown + Gen 4 refs.)
  *
- * R5 OFF-LINEAGE GOES RIGHT, SAME RANK: within-rank x-order key =
- *     (rank, lineage true-first, edge-order index in graph.json, id).
- *     Cain-line shares ranks with Seth-line but sits right; Lot sits in
- *     Abraham's rank on the right. No left-right mode, no special casing.
+ * R5 CENTERED DESCENT; OFFSHOOTS PEEL RIGHT (amended): within-rank x is
+ *     anchored to the family column, NOT left-packed. Each family unit's
+ *     children are centered under the unit's x (unit x = mean of member
+ *     positions), so a single main child sits exactly under its parent unit
+ *     and the main bloodline (Adam-Seth-Noah-Shem-Abraham-Isaac-Jacob-Judah)
+ *     reads as near-vertical columns. Offshoot subtrees (roots marked
+ *     lineage:false — Cain line, Canaan/Nimrod, Ishmael/Esau) peel RIGHT of
+ *     the main column at the same rank and their descendants stay with
+ *     them. The within-rank ORDER key is still (rank, lineage true-first,
+ *     edge-order index in graph.json, id); Lot-like floaters sit right of
+ *     everything on their rank. Two passes: pass 1 = existing ELK/R5 order
+ *     as a seed only; pass 2 = top-down centering from founders with a
+ *     per-rank overlap sweep (subtrees shift right, never across ranks).
+ *     No left-right mode, no special casing.
  *
  * R6 EDGE ORDER IS LAW: spouse-edge order in graph.json = wife left-to-right
  *     (member order inside a family unit); parent edges grouped by mother then
  *     birth order = sibling order. Layout derives order ONLY from these
  *     (plus the R5 key). See docs/DATA_GUIDE.md.
+ *
+ * R7 ERA STACKING (era-aware rank floors): rank is era-aware. Founder nodes
+ *     (no incoming parent edge) get baseRank = 1 + max rank of all nodes in
+ *     strictly earlier eras (era order from eras.json; the earliest era
+ *     present keeps base 0 so R1's "rank 0 = Adam/Eve" holds). Generation
+ *     rank then accumulates +1 per parent step within the component, so a
+ *     new era's roots stack BELOW the previous era's floor (exodus roots sit
+ *     under the patriarchs floor, not beside Adam/Eve) and future eras stack
+ *     likewise. Multi-era components keep their computed rank — the parent
+ *     chain wins over the era floor — and EraBand boxes (pure bounding boxes
+ *     of member ranks, never shifts) stretch to contain them. y stays
+ *     rank * (PERSON_SIZE.height + RANK_GAP).
  */
 
 export interface LayoutNode {
@@ -139,14 +163,16 @@ export const rankY = (rank: number): number => rank * (PERSON_SIZE.height + RANK
 /**
  * Strict top-down generation-ranked layout (R1–R6).
  *
- * 1. rank() from parent edges; spouse components share max rank; Lot-like
+ * 1. rank() from parent edges with R7 era floors (founder comps start at
+ *    their era's floor); spouse components share max rank; Lot-like
  *    encounter-only persons inherit their anchor's rank; events are rankless.
  * 2. ELK sees ONLY spouse+parent structure (family units + parent edges),
  *    one partition per rank, conservative options (see header) — x within a
  *    rank only.
- * 3. Post-pass: y pinned to rankY(rank); within-rank x enforced in R5 order
- *    (ELK x kept when it already agrees, else re-seated — data order is law);
- *    events + off-graph persons floated beside/below anchors, never stacked.
+ * 3. Post-pass: y pinned to rankY(rank); x by R5 centered descent (pass 1 =
+ *    ELK/R5 seed order, pass 2 = children centered under their parent unit,
+ *    offshoot subtrees peeled right of the main column); events + off-graph
+ *    persons floated beside/below anchors, never stacked.
  */
 export async function computeLayout(
   visibleNodes: readonly LayoutNode[],
@@ -163,9 +189,20 @@ export async function computeLayout(
   const edgeIndex = new Map<LayoutEdge, number>();
   visibleEdges.forEach((e, i) => edgeIndex.set(e, i));
 
-  // Era order = first appearance in visibleNodes (follows eras.json order).
-  const eraOrder: string[] = [];
-  for (const n of visibleNodes) if (!eraOrder.includes(n.era)) eraOrder.push(n.era);
+  // R7: era order from eras.json (unknown eras keep first-appearance order
+  // after the known ones). Bands and era floors both follow this order.
+  const eraIndex = new Map<string, number>();
+  eraDefs.forEach((e, i) => eraIndex.set(e.id, i));
+  const appearance: string[] = [];
+  for (const n of visibleNodes) if (!appearance.includes(n.era)) appearance.push(n.era);
+  const eraOrder = [...appearance].sort((a, b) => {
+    const ia = eraIndex.get(a);
+    const ib = eraIndex.get(b);
+    if (ia !== undefined && ib !== undefined) return ia - ib;
+    if (ia !== undefined) return -1;
+    if (ib !== undefined) return 1;
+    return appearance.indexOf(a) - appearance.indexOf(b);
+  });
 
   // ---- 1. Generation ranks (R1) -------------------------------------------
   // Spouse components collapse first (wives join the husband's component),
@@ -175,7 +212,6 @@ export async function computeLayout(
   // Hagar) and founders (Adam/Eve) fall out naturally; encounter-only
   // persons (Lot) and childless comps inherit their anchor's rank below.
   const personNodes = visibleNodes.filter((n) => n.kind === "person");
-  const baseRank = computeGenerationRank(personNodes, visibleEdges);
 
   const spouseNeighbors = new Map<string, string[]>();
   for (const e of visibleEdges) {
@@ -223,22 +259,47 @@ export async function computeLayout(
     compParentEdgeCount.set(cv, (compParentEdgeCount.get(cv) ?? 0) + 1);
   }
   const compRankMemo = new Map<number, number>();
-  const compRankOf = (c: number, stack: Set<number>): number => {
+  const eraBaseMemo = new Map<string, number>();
+  // R7 ERA STACKING: a founder component (no incoming parent edge) starts at
+  // its era's floor — baseRank = 1 + max rank of all nodes in strictly
+  // earlier eras (eraBaseRank helper) — so a new era's roots stack BELOW the
+  // previous era's floor instead of sharing rank 0 with Adam/Eve. Generation
+  // rank then accumulates +1 per parent step within the component. Multi-era
+  // components keep their computed rank: the parent chain wins over the era
+  // floor (e.g. Eber stays one below Shem). Cycle-safe like the raw pass.
+  const eraBaseOf = (era: string, stack: Set<string>): number => {
+    const hit = eraBaseMemo.get(era);
+    if (hit !== undefined) return hit;
+    const key = `era:${era}`;
+    if (stack.has(key)) return 0; // era-crossing edge: break, don't hang
+    stack.add(key);
+    const base = eraBaseRank(era, eraOrder, personNodes, (id) => {
+      const c = compOf.get(id);
+      return c === undefined ? 0 : compRankOf(c, stack);
+    });
+    stack.delete(key);
+    eraBaseMemo.set(era, base);
+    return base;
+  };
+  const compRankOf = (c: number, stack: Set<string>): number => {
     const hit = compRankMemo.get(c);
     if (hit !== undefined) return hit;
-    if (stack.has(c)) return 0;
+    const key = `comp:${c}`;
+    if (stack.has(key)) return 0;
     const parents = compParents.get(c);
     if (!parents || parents.size === 0) {
-      // Founder component: max person-level base rank (normally 0; a
-      // spouse-only member never outranks the component's own founders).
-      const top = Math.max(...compMembers[c].map((id) => baseRank.get(id) ?? 0), 0);
+      // Founder component: max era floor over its members (R7).
+      const top = Math.max(
+        ...compMembers[c].map((id) => eraBaseOf(nodeById.get(id)!.era, stack)),
+        0
+      );
       compRankMemo.set(c, top);
       return top;
     }
-    stack.add(c);
+    stack.add(key);
     let best = 0;
     for (const p of parents) best = Math.max(best, compRankOf(p, stack));
-    stack.delete(c);
+    stack.delete(key);
     compRankMemo.set(c, best + 1);
     return best + 1;
   };
@@ -434,14 +495,16 @@ export async function computeLayout(
   const elkX = new Map<string, number>();
   for (const g of laidOut.children ?? []) elkX.set(g.id, g.x ?? 0);
 
-  // ---- 4. Commit units: y PINNED by rank (R1); x in R5 order (R5/R6) -------
-  const expandUnit = (unit: FamilyUnit, x0: number, y0: number) => {
-    let x = x0;
-    for (const id of unit.members) {
-      positions.set(id, { x, y: y0 });
-      x += sizeOf(nodeById.get(id)!).width + SPOUSE_GAP;
-    }
-  };
+  // ---- 4. Within-rank x: R5 CENTERED DESCENT (two passes) -----------------
+  // PASS 1 (seed only): existing R5 order — ELK x when it already agrees with
+  // the R5/R6 key, else a left-packed re-seat (data order is law).
+  // PASS 2 (authoritative): ranks top-down from founders. Each family unit's
+  // children are centered under the unit's x ("family column"); offshoot
+  // subtrees (roots with lineage:false) peel RIGHT of the main column at
+  // their rank and stay together. A per-rank overlap sweep shifts subtrees
+  // right — never across ranks (R1/R2).
+  const seedX = new Map<string, number>();
+  const rowOrder = new Map<number, FamilyUnit[]>();
   {
     // Group layered units per rank.
     const byRank = new Map<number, FamilyUnit[]>();
@@ -451,24 +514,155 @@ export async function computeLayout(
       byRank.get(r)!.push(u);
     }
     for (const [r, group] of byRank) {
-      const y = rankY(r);
       // ELK x-order within the rank…
       const byElkX = [...group].sort((a, b) => (elkX.get(a.id) ?? 0) - (elkX.get(b.id) ?? 0));
       // …must agree with the R5 data key; if ELK ever swaps, data wins.
       const r5 = [...group].sort((a, b) => cmpKey(unitKey(a), unitKey(b)));
       const agrees = byElkX.every((u, i) => u.id === r5[i].id);
       const ordered = agrees ? byElkX : r5;
-      let x: number;
+      rowOrder.set(r, ordered);
       if (agrees) {
-        for (const u of ordered) expandUnit(u, elkX.get(u.id) ?? 0, y);
+        for (const u of ordered) seedX.set(u.id, elkX.get(u.id) ?? 0);
       } else {
-        x = Math.min(...group.map((u) => elkX.get(u.id) ?? 0));
+        let x = Math.min(...group.map((u) => elkX.get(u.id) ?? 0));
         for (const u of ordered) {
-          expandUnit(u, x, y);
-          x += u.width + SPOUSE_GAP * 2;
+          seedX.set(u.id, x);
+          x += u.width + UNIT_GAP;
         }
       }
     }
+  }
+
+  // Unit anchor = mean of member centers ("unit x = mean of member
+  // positions"); member widths are uniform in practice, but this is computed
+  // generally.
+  const memberOffset = (u: FamilyUnit): number => {
+    let sum = 0;
+    let dx = 0;
+    for (const id of u.members) {
+      const w = sizeOf(nodeById.get(id)!).width;
+      sum += dx + w / 2;
+      dx += w + SPOUSE_GAP;
+    }
+    return sum / u.members.length;
+  };
+  const unitCenter = (u: FamilyUnit, x: number): number => x + memberOffset(u);
+
+  // Parent units per unit (parent edges only, R3).
+  const parentUnitsOf = new Map<string, string[]>();
+  for (const e of visibleEdges) {
+    if (e.type !== "parent") continue;
+    const su = unitOf.get(e.from);
+    const tu = unitOf.get(e.to);
+    if (!su || !tu || su === tu) continue;
+    const list = parentUnitsOf.get(tu) ?? [];
+    if (!list.includes(su)) list.push(su);
+    parentUnitsOf.set(tu, list);
+  }
+
+  // R5 offshoot: a unit is inside an offshoot subtree when it is lineage:false
+  // or descends from one. The topmost such unit (the root) peels right and its
+  // descendants stay with it. Rows are processed top-down (parents always sit
+  // at a strictly lower rank), so one pass resolves the flags.
+  const unitMain = (u: FamilyUnit): boolean => u.members.some((id) => lineageOf(id));
+  const inOffshoot = new Map<string, boolean>();
+
+  const finalX = new Map<string, number>();
+  const rows = [...rowOrder.keys()].sort((a, b) => a - b);
+  for (const r of rows) {
+    const row = rowOrder.get(r)!;
+    const rowMain: FamilyUnit[] = [];
+    const rowOffRoot: FamilyUnit[] = [];
+    const rowOffRest: FamilyUnit[] = [];
+    for (const u of row) {
+      const parents = parentUnitsOf.get(u.id) ?? [];
+      const off = !unitMain(u) || parents.some((p) => inOffshoot.get(p) === true);
+      inOffshoot.set(u.id, off);
+      if (!off) rowMain.push(u);
+      else if (!unitMain(u) && parents.every((p) => inOffshoot.get(p) !== true)) rowOffRoot.push(u);
+      else rowOffRest.push(u);
+    }
+
+    // Desired x: each family unit's children centered under the unit's x
+    // (children sharing a parent set form one centered group). Offshoot roots
+    // are set after the main column is known (peel right).
+    const desired = new Map<string, number>();
+    const groups = new Map<string, FamilyUnit[]>();
+    for (const u of [...rowMain, ...rowOffRest]) {
+      const parents = (parentUnitsOf.get(u.id) ?? []).filter((p) => finalX.has(p));
+      if (parents.length === 0) {
+        desired.set(u.id, seedX.get(u.id) ?? 0); // founders keep the pass-1 seed
+        continue;
+      }
+      const key = parents.join("|");
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(u);
+    }
+    for (const [key, members] of groups) {
+      const parents = key.split("|");
+      const anchor =
+        parents.reduce(
+          (sum, p) => sum + unitCenter(unitById.get(p)!, finalX.get(p)!),
+          0
+        ) / parents.length;
+      const total =
+        members.reduce((w, u) => w + u.width, 0) + UNIT_GAP * (members.length - 1);
+      let x = anchor - total / 2;
+      for (const u of members) {
+        desired.set(u.id, x);
+        x += u.width + UNIT_GAP;
+      }
+    }
+
+    // Left-to-right overlap sweep (subtrees shift right; R5/R6 order is law).
+    const sweep = (list: FamilyUnit[], minX: number): number => {
+      const sorted = [...list].sort(
+        (a, b) =>
+          (desired.get(a.id) ?? 0) - (desired.get(b.id) ?? 0) ||
+          cmpKey(unitKey(a), unitKey(b))
+      );
+      let prevRight = minX - UNIT_GAP;
+      for (const u of sorted) {
+        const x = Math.max(desired.get(u.id) ?? 0, prevRight + UNIT_GAP);
+        finalX.set(u.id, x);
+        prevRight = x + u.width;
+      }
+      return prevRight;
+    };
+
+    // Main column first …
+    const mainRight = sweep(rowMain, Number.NEGATIVE_INFINITY);
+    // … then offshoot subtrees peel RIGHT of it at the same rank (R5).
+    let peelMin = mainRight;
+    if (!Number.isFinite(peelMin)) {
+      // No main column on this rank: peel right of the offshoot's parents.
+      peelMin = Number.NEGATIVE_INFINITY;
+      for (const u of [...rowOffRoot, ...rowOffRest]) {
+        for (const p of parentUnitsOf.get(u.id) ?? []) {
+          if (!finalX.has(p)) continue;
+          peelMin = Math.max(peelMin, finalX.get(p)! + unitById.get(p)!.width);
+        }
+      }
+    }
+    const peelBase = Number.isFinite(peelMin) ? peelMin + FREE_NODE_GAP : Number.NEGATIVE_INFINITY;
+    for (const u of rowOffRoot) {
+      const base = seedX.get(u.id) ?? 0;
+      desired.set(u.id, peelBase === Number.NEGATIVE_INFINITY ? base : Math.max(base, peelBase));
+    }
+    sweep([...rowOffRoot, ...rowOffRest], peelBase);
+  }
+
+  // Commit units: y PINNED by rank (R1); x from the descent pass (R5).
+  const expandUnit = (unit: FamilyUnit, x0: number, y0: number) => {
+    let x = x0;
+    for (const id of unit.members) {
+      positions.set(id, { x, y: y0 });
+      x += sizeOf(nodeById.get(id)!).width + SPOUSE_GAP;
+    }
+  };
+  for (const [r, row] of rowOrder) {
+    const y = rankY(r);
+    for (const u of row) expandUnit(u, finalX.get(u.id) ?? seedX.get(u.id) ?? 0, y);
   }
 
   // ---- 5. Floater persons (Lot): anchor rank, right side, same row (R5) ----
@@ -572,10 +766,21 @@ export async function computeLayout(
     placed.push({ x, y, width: s.width, height: s.height });
   }
 
-  // ---- 7. Era bands: bounding boxes only — NEVER shift nodes (R1) ----------
-  // A node's y belongs to its rank. Eras interleave ranks in Wave 0
-  // (patriarch Eber sits at rank 7 among primordial ranks), so bands may
-  // overlap; that is correct — rank beats era. No dy shifting, ever.
+  // ---- 7. Normalize x to a 0-based canvas (uniform shift only) ------------
+  // Centered descent can push columns negative; shift everything right so the
+  // leftmost card starts at x = 0. A uniform dx never crosses ranks (R1/R2)
+  // and never changes within-rank order or centering (R5).
+  let minX = Number.POSITIVE_INFINITY;
+  for (const p of positions.values()) minX = Math.min(minX, p.x);
+  if (Number.isFinite(minX) && minX !== 0) {
+    for (const p of positions.values()) p.x -= minX;
+  }
+
+  // ---- 8. Era bands: bounding boxes only — NEVER shift nodes (R1/R7) ------
+  // A node's y belongs to its rank. Eras stack (R7) but multi-era components
+  // keep their computed rank (patriarch Eber sits at rank 7 among primordial
+  // ranks), so bands may stretch/overlap; that is correct — rank beats era.
+  // No dy shifting, ever.
   const eraNodeIds = new Map<string, string[]>();
   for (const n of visibleNodes) {
     if (!positions.has(n.id)) continue;
